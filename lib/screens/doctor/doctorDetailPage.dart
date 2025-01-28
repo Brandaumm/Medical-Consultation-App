@@ -244,13 +244,13 @@ class _DoctorDetailPageState extends State<DoctorDetailPage> {
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2101),
+      initialDate: DateTime.now(), //Data atual
+      firstDate: DateTime.now(),  //Data minima
+      lastDate: DateTime(2101),   //Data maxima
     );
     if (picked != null && picked != _selectedDate) {
       setState(() {
-        _selectedDate = picked;
+        _selectedDate = picked; //Seleciona a data
       });
     }
   }
@@ -269,18 +269,18 @@ class _DoctorDetailPageState extends State<DoctorDetailPage> {
 
   void _openMap() async {
     final String googleMapUrl =
-        'https://www.google.com/maps/search/?api=1&query=${widget.doctor.latitude},${widget.doctor.longitude}';
-    if (await canLaunch(googleMapUrl)) {
-      await launch(googleMapUrl);
+        'https://www.google.com/maps/search/?api=1&query=${widget.doctor.latitude},${widget.doctor.longitude}'; //Construção da URL aceita pelo google maps
+    if (await canLaunch(googleMapUrl)) { //Verifica se pode abrir a url
+      await launch(googleMapUrl); //Se for possivel ira abrir o google
     } else {
       throw 'Não pode abrir o mapa';
     }
   }
 
   void _makePhoneCall(String phoneNumber) async {
-    final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
-    if (await canLaunch(phoneUri.toString())) {
-      await launch(phoneUri.toString());
+    final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber); //Cria a Uri de acordo com o numero de telone
+    if (await canLaunch(phoneUri.toString())) { //Verifica se pode fazer chamada
+      await launch(phoneUri.toString()); //Faz chamada
     } else {
       throw 'Não foi possivel chamar esse numer $phoneNumber';
     }
@@ -290,13 +290,13 @@ class _DoctorDetailPageState extends State<DoctorDetailPage> {
   void _bookAppointment() {
     if (_selectedDate != null &&
         _selectedTime != null &&
-        _descriptionController.text.isNotEmpty) {
-      String date = DateFormat('MM/dd/yyyy').format(_selectedDate!);
-      String time = _selectedTime!.format(context);
+        _descriptionController.text.isNotEmpty) { //Verifica se tudo foi preenchido
+      String date = DateFormat('MM/dd/yyyy').format(_selectedDate!); //Formatacao
+      String time = _selectedTime!.format(context); // Formatacao
       String description = _descriptionController.text;
-      String requestId = _requestDatabase.push().key!;
-      String currentUserId = _auth.currentUser!.uid;
-      String receiverId = widget.doctor.uid;
+      String requestId = _requestDatabase.push().key!; //identificador
+      String currentUserId = _auth.currentUser!.uid; //Pega o id do usuario atual
+      String receiverId = widget.doctor.uid; //pega o id do doutor
       String status = 'pending';
 
       _requestDatabase.child(requestId).set({

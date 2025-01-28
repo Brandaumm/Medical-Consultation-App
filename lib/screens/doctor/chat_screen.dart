@@ -20,15 +20,15 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance; 
   final DatabaseReference _chatListDatabase =
       FirebaseDatabase.instance.ref().child('ChatList');
   final DatabaseReference _chatDatabase =
       FirebaseDatabase.instance.ref().child('Chat');
-  final TextEditingController _messageController = TextEditingController();
-  String? _currentUserId;
+  final TextEditingController _messageController = TextEditingController(); //Controlador de texto da mensagem digitada
+  String? _currentUserId; //id do atual usuario
 
-  bool get isDoctor => _currentUserId == widget.doctorId;
+  bool get isDoctor => _currentUserId == widget.doctorId; //verifica se é doutor
 
   @override
   void initState() {
@@ -39,22 +39,22 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _sendMessage() {
     if (_messageController.text.trim().isNotEmpty) {
-      String message = _messageController.text.trim();
-      String chatId = _chatDatabase.push().key!;
-      String timeStamp = DateTime.now().toIso8601String();
+      String message = _messageController.text.trim(); //Retira espacos inuteis
+      String chatId = _chatDatabase.push().key!; //ID de cada mensagem 
+      String timeStamp = DateTime.now().toIso8601String(); //Horario do envio
 
       String senderUid;
       String receiverUid;
 
-      if (isDoctor) {
+      if (isDoctor) { //Se for doutor, doutor sera o remetente e o paciente o receptor
         senderUid = _currentUserId!;
         receiverUid = widget.patientId!;
-      } else {
+      } else { //inverso
         senderUid = _currentUserId!;
         receiverUid = widget.doctorId!;
       }
 
-      _chatDatabase.child(chatId).set({
+      _chatDatabase.child(chatId).set({ //Salvando mensagem
         'message': message,
         'receiver': receiverUid,
         'sender': senderUid,
@@ -69,13 +69,13 @@ class _ChatScreenState extends State<ChatScreen> {
         'id': senderUid,
       });
 
-      _messageController.clear();
+      _messageController.clear(); //Limpa o campo depois de enviar a mensagem
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    String? chatPartnerName = isDoctor ? widget.patientName : widget.doctorName;
+    String? chatPartnerName = isDoctor ? widget.patientName : widget.doctorName; //Nome do parceiro da conversa
 
     return GestureDetector(
       onTap: () {
@@ -84,49 +84,49 @@ class _ChatScreenState extends State<ChatScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            '$chatPartnerName',
+            '$chatPartnerName', //Nome do chat
             style: TextStyle(fontSize: 16),
           ),
         ),
         body: Column(
           children: [
             Expanded(
-                child: StreamBuilder(
-                    stream: _chatDatabase.onValue,
+                child: StreamBuilder( //Reconstroi sempre que há mudanças
+                    stream: _chatDatabase.onValue, //Sempre que houver mudanca
                     builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
                       if (!snapshot.hasData ||
                           snapshot.data?.snapshot.value == null) {
                         return Center(child: Text('Nenhuma mensagem ainda.'));
-                      }
+                      } //Verficação de dados disponiveis
                       Map<dynamic, dynamic> messagesMap = snapshot
                           .data!.snapshot.value as Map<dynamic, dynamic>;
-                      List<Map<String, dynamic>> messagesList = [];
+                      List<Map<String, dynamic>> messagesList = []; //Lista das mensagens
 
-                      messagesMap.forEach((key, value) {
+                      messagesMap.forEach((key, value) { //Filtra as mensagens da conversa para que apenas as mensagens entre os dois lados sejam mostradadas
                         if ((value['sender'] == _currentUserId &&
-                                value['receiver'] == widget.doctorId) ||
+                                value['receiver'] == widget.doctorId) || //Se remetende é o usuario e destinatario é o mdeidoc
                             (value['sender'] == widget.doctorId &&
-                                value['receiver'] == _currentUserId) ||
+                                value['receiver'] == _currentUserId) || //Se remetente é o medico e o destinatario é o usuario
                             (value['sender'] == _currentUserId &&
-                                value['receiver'] == widget.patientId) ||
+                                value['receiver'] == widget.patientId) || //Se o remetente é o usuario e o destinatario é o paciente
                             (value['sender'] == widget.patientId &&
-                                value['receiver'] == _currentUserId)) {
+                                value['receiver'] == _currentUserId)) { //Se o remetente é o paciente e o destinatario o usuario atual
                           messagesList.add({
                             'message': value['message'],
                             'sender': value['sender'],
                             'timestamp': value['timestamp'],
-                          });
+                          }); //Adicionando as mensagem que possuem as regras na lista
                         }
                       });
                       messagesList.sort(
-                          (a, b) => a['timestamp'].compareTo(b['timestamp']));
+                          (a, b) => a['timestamp'].compareTo(b['timestamp'])); //Ordena as mensagens por ordem de envio
 
                       return ListView.builder(
-                          itemCount: messagesList.length,
+                          itemCount: messagesList.length, //Numero total de mensagens
                           itemBuilder: (context, index) {
                             bool isMe =
-                                messagesList[index]['sender'] == _currentUserId;
-                            return Align(
+                                messagesList[index]['sender'] == _currentUserId; //Verifica se a mensagem foi adicionada pelo atual usuario
+                            return Align( //Se for verdadeira a mensagem ficara a direita, se nao a esquerda
                               alignment: isMe
                                   ? Alignment.centerRight
                                   : Alignment.centerLeft,
@@ -158,7 +158,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     })),
             Padding(
               padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              child: Row(
+              child: Row( //Campo para inserir mensagem
                 children: [
                   Expanded(
                     child: SizedBox(
